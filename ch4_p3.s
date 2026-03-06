@@ -1,39 +1,18 @@
 .data
 arr: .word 93,8,78,-6,51,49,3,2,128,0
-n:   .word 9
+newline: .asciz "\n" 
 
 .text
 .globl main
 main:
-  addi sp, sp, 10000
-
-  addi a0, x0, 0
-  
-  addi t0,x0,93
-  sw t0,0(a0) # take the value inside t0 and store it into the memory address 0(a0)
-  addi t0,x0,8
-  sw t0, 4(a0)
-  addi t0,x0,78
-  sw t0, 8(a0)
-  addi t0,x0-6,
-  sw t0, 12(a0)
-  addi t0,x0,51
-  sw t0, 16(a0)
-  addi t0,x0,49
-  sw t0, 20(a0)
-  addi t0,x0,3
-  sw t0, 24(a0)
-  addi t0,x0,2
-  sw t0, 28(a0)
-  addi t0,x0,128
-  sw t0, 32(a0)
-  addi t0,x0,0
-  sw t0, 36(a0)
-
-  addi a1, x0, 10
+  la a0, arr
+  addi a1, x0, 10 # a1 = len(arr)
 
   jal ra, SEL_SORT
-  jal ra, FIN 
+  jal ra, print_arr
+
+  li a7, 10
+  ecall 
 SEL_SORT:
   addi sp,sp, -8
   sw ra, 4(sp)
@@ -71,19 +50,22 @@ MIN_REMAINS_SAME:
   beq x0, x0,SUBARRAY_LOOP
 
 END_SUBARRAY_LOOP:
-  slli t5, t0,2 # min_index*sizeof(int)
-  add t6, a0, t5 # arr[min_index]
-  lw t3, 0(t6)
+#get address and value of arr[i]
+  slli t5, t0,2 
+  add t1, a0, t5 # t1 = address of arr[i]
+  lw t3, 0(t1) # t3 = arr[i]
 
-  slli t1, t0, 2 # i*sizeof(int)
-  add t1, t1, a0 # arr[i]
-  lw t4, 0(t1)
+#get address and value of arr[min_index]
+  slli t5, t2, 2 # use t2 (=min_index) here
+  add t6, a0, t5 # t6 = address of arr[min_index]
+  lw t4, 0(t6) # t4 = arr[min_index]
 
-  sw t3, 0(t1)
-  sw t4, 0(t6)
+#perform swap
+  sw t4, 0(t1) # store arr[min_index] into arr[i]
+  sw t3, 0(t6) # store arr[i] into arr[min_index]
 
-  addi t0, t0, 1 # i = i+1
-  beq x0, x0, UNSORTED_ARRAY_BOUNDARY_LOOP
+  addi t0, t0, 1 # i++
+  j UNSORTED_ARRAY_BOUNDARY_LOOP
 
 
 END_UNSORTED_ARRAY_BOUNDARY_LOOP:
@@ -92,19 +74,29 @@ END_UNSORTED_ARRAY_BOUNDARY_LOOP:
   addi sp,sp, 8
   jalr x0,ra,0
 
+print_arr:
+  la t2, arr
 
-FIN:
-  li a7, 4
-  la a0, ans
+  li t0, 0
+  li t3, 10
+
+loop_start:
+  bge t0,t3, FIN
+
+  slli t1, t0, 2
+  add t1, t2, t1 # t1 = &arr[i]
+  lw a0, 0(t1)
+ 
+  li a7,1
   ecall
 
-  li a7, 1
-  mv a0, t1 # char to print
-  ecall
-
-  li a7,4 # print "\n"
+  li a7,4
   la a0, newline
   ecall
-  
+
+  addi t0, t0, 1
+  j loop_start
+
+FIN:
   li a7, 10 # exit
   ecall
