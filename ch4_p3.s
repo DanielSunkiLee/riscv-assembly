@@ -1,6 +1,7 @@
 .data
 arr: .word 93,8,78,-6,51,49,3,2,128,0
 newline: .asciz "\n" 
+tab: .asciz "\t"
 
 .text
 .globl main
@@ -9,7 +10,7 @@ main:
   addi a1, x0, 10 # a1 = len(arr)
 
   jal ra, SEL_SORT
-  jal ra, print_arr
+  jal ra, MIN_MAX
 
   li a7, 10
   ecall 
@@ -74,28 +75,34 @@ END_UNSORTED_ARRAY_BOUNDARY_LOOP:
   addi sp,sp, 8
   jalr x0,ra,0
 
-print_arr:
-  la t2, arr
-
+MIN_MAX:
   li t0, 0
-  li t3, 10
+  la t2, arr
+  
+  slli t1, t0,2 
+  add t1, t2, t1 # t1 = address of arr[i]
+  lw a0, 0(t1) # t3 = arr[i]
 
-loop_start:
-  bge t0,t3, FIN
+  li a7, 1
+  ecall
+  
+  li a7,4
+  la a0, tab
+  ecall
 
-  slli t1, t0, 2
-  add t1, t2, t1 # t1 = &arr[i]
-  lw a0, 0(t1)
- 
-  li a7,1
+  addi t0, t0, 9
+
+  slli t1, t0,2
+  add t1, t2, t1 # t1 = address of arr[i]
+  lw a0, 0(t1) # t3 = arr[i]
+
+  li a7, 1
   ecall
 
   li a7,4
   la a0, newline
   ecall
 
-  addi t0, t0, 1
-  j loop_start
 
 FIN:
   li a7, 10 # exit
