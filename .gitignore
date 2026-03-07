@@ -1,0 +1,25 @@
+# assembled object files and executables
+*.o
+*.out
+*.obj
+*.bin
+*.hex
+
+# exclude memory dump files or log files
+*.dump
+*.log
+*.trace
+
+#vscode settings and workspace files
+.vscode/
+*.code-workspace
+
+#temp files created by text editors
+*.swp
+*~
+
+#OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
